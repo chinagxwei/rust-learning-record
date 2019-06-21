@@ -28,7 +28,7 @@ struct Weather2<'a, F> where F: Fn(&str, &str) {
 /// 带键值的 订阅结构体
 /// 回调 fn 参数是一个 源结构体
 ///
-struct Weather3<'a, F> where F: Fn(Source) {
+struct Weather3<'a, F> where F: Fn(Source) -> bool {
     list: HashMap<&'a str, F>
 }
 
@@ -63,12 +63,12 @@ impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
         }
     }
 
-    fn publish(&self, k: &str, weather: &str, wind: &str) {
-        match self.list.get(k) {
-            Some(f) => {
-                f(weather, wind)
-            }
-            _ => {}
+    fn publish(&self, k: &str, weather: &str, wind: &str) -> bool {
+        if let Some(f) = self.list.get(k) {
+            f(weather, wind);
+            true
+        } else {
+            false
         }
     }
 }
@@ -76,7 +76,7 @@ impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
 ///
 /// 3号结构体实例化
 ///
-impl<'a, F: Fn(Source)> Weather3<'a, F> {
+impl<'a, F: Fn(Source) -> bool> Weather3<'a, F> {
     fn listen(&mut self, k: &'a str, f: F) {
         self.list.insert(k, f);
     }
@@ -89,12 +89,11 @@ impl<'a, F: Fn(Source)> Weather3<'a, F> {
         }
     }
 
-    fn publish(&self, k: &str, s: Source) {
-        match self.list.get(k) {
-            Some(f) => {
-                f(s)
-            }
-            _ => {}
+    fn publish(&self, k: &str, s: Source) -> bool {
+        if let Some(f) = self.list.get(k) {
+            f(s)
+        } else {
+            false
         }
     }
 }
@@ -132,10 +131,11 @@ fn main() {
     ///
 
     let mut w3 = Weather3 { list: HashMap::new() };
-    let ww3: &mut Weather3<fn(Source)> = &mut w3;
+    let ww3: &mut Weather3<fn(Source) -> bool> = &mut w3;
 
-    ww3.listen("Weather", |s| {
+    ww3.listen("Weather", |s| -> bool {
         println!("天气: {} ,风力: {}", s.0, s.1);
+        true
     });
 
     ww3.publish("Weather", Source("台风", "狂风6级"));
