@@ -55,6 +55,14 @@ impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
         self.list.insert(k, f);
     }
 
+    fn unlisten(&mut self, k: &'a str) -> bool {
+        if let Some(v) = self.list.remove(k) {
+            true
+        } else {
+            false
+        }
+    }
+
     fn publish(&self, k: &str, weather: &str, wind: &str) {
         match self.list.get(k) {
             Some(f) => {
@@ -71,6 +79,14 @@ impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
 impl<'a, F: Fn(Source)> Weather3<'a, F> {
     fn listen(&mut self, k: &'a str, f: F) {
         self.list.insert(k, f);
+    }
+
+    fn unlisten(&mut self, k: &'a str) -> bool {
+        if let Some(v) = self.list.remove(k) {
+            true
+        } else {
+            false
+        }
     }
 
     fn publish(&self, k: &str, s: Source) {
