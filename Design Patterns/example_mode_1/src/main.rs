@@ -1,8 +1,12 @@
 use std::collections::HashMap;
 
+///
+/// 源结构体
+///
 struct Source<'a>(&'a str, &'a str);
 
 ///
+/// 1号结构体
 /// 不带键值的 订阅结构体
 /// 回调 fn 参数是两个字符串引用
 ///
@@ -11,6 +15,7 @@ struct Weather<F> where F: Fn(&str, &str) {
 }
 
 ///
+/// 2号结构体
 /// 带键值的 订阅结构体
 /// 回调 fn 参数是两个字符串引用
 ///
@@ -19,6 +24,7 @@ struct Weather2<'a, F> where F: Fn(&str, &str) {
 }
 
 ///
+/// 3号结构体
 /// 带键值的 订阅结构体
 /// 回调 fn 参数是一个 源结构体
 ///
@@ -26,6 +32,9 @@ struct Weather3<'a, F> where F: Fn(Source) {
     list: HashMap<&'a str, F>
 }
 
+///
+/// 1号结构体实例化
+///
 impl<F: Fn(&str, &str)> Weather<F> {
     fn listen(&mut self, f: F) {
         self.list.push(f);
@@ -38,6 +47,9 @@ impl<F: Fn(&str, &str)> Weather<F> {
     }
 }
 
+///
+/// 2号结构体实例化
+///
 impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
     fn listen(&mut self, k: &'a str, f: F) {
         self.list.insert(k, f);
@@ -53,6 +65,9 @@ impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
     }
 }
 
+///
+/// 3号结构体实例化
+///
 impl<'a, F: Fn(Source)> Weather3<'a, F> {
     fn listen(&mut self, k: &'a str, f: F) {
         self.list.insert(k, f);
@@ -70,6 +85,10 @@ impl<'a, F: Fn(Source)> Weather3<'a, F> {
 
 
 fn main() {
+    ///
+    /// 1号实体案例调用
+    ///
+
     let mut w = Weather { list: vec![] };
     let ww: &mut Weather<fn(&str, &str)> = &mut w;
     ww.listen(|a, b| {
@@ -79,8 +98,11 @@ fn main() {
     ww.publish("晴天", "微风");
     ww.publish("雷阵雨", "5级风");
 
-    let mut w2 = Weather2 { list: HashMap::new() };
+    ///
+    /// 2号实体案例调用
+    ///
 
+    let mut w2 = Weather2 { list: HashMap::new() };
     let ww2: &mut Weather2<fn(&str, &str)> = &mut w2;
 
     ww2.listen("天气", |a, b| {
@@ -89,8 +111,11 @@ fn main() {
 
     ww2.publish("天气", "多云转晴", "东南风3级");
 
-    let mut w3 = Weather3 { list: HashMap::new() };
+    ///
+    /// 3号实体案例调用
+    ///
 
+    let mut w3 = Weather3 { list: HashMap::new() };
     let ww3: &mut Weather3<fn(Source)> = &mut w3;
 
     ww3.listen("Weather", |s| {
