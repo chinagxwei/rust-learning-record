@@ -2,22 +2,37 @@
 /// 通过代理帮助男孩购买饼干
 ///
 
+///
+/// 饼干结构
+///
 struct Cookie {
     name: String
 }
 
+///
+/// 男孩结构
+///
 struct Boy {
     name: String
 }
 
+///
+/// 一般代理结构
+///
 struct Proxy<'a> {
     boy: &'a Boy
 }
 
+///
+/// 虚拟代理结构
+///
 struct Proxy2<'a> {
     boy: Option<&'a Boy>,
 }
 
+///
+/// 男孩实例
+///
 impl Boy {
     fn new(s: String) -> Boy {
         Boy { name: s }
