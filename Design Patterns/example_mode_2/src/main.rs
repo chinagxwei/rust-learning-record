@@ -52,7 +52,7 @@ impl<'a> Proxy<'a> {
     }
 
     fn buy_cookie(&self, c: Cookie) {
-        *&self.boy.buy_cookie(c.name)
+        self.boy.buy_cookie(c.name)
     }
 }
 
@@ -65,7 +65,7 @@ impl<'a> Proxy2<'a> {
     }
 
     fn init(&mut self, b: &'a Boy) -> &mut Proxy2<'a> {
-        if let None = &self.boy {
+        if let None = self.boy {
             self.boy = Some(b)
         }
         self
