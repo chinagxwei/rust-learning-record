@@ -72,7 +72,7 @@ impl<'a> Proxy2<'a> {
     }
 
     fn buy_cookie(&self, c: Cookie) {
-        if let Some(b) = &self.boy {
+        if let Some(b) = self.boy {
             b.buy_cookie(c.name);
         }
     }
