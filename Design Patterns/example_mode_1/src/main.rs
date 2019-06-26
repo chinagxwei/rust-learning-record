@@ -11,7 +11,7 @@ struct Source<'a>(&'a str, &'a str);
 /// 回调 fn 参数是两个字符串引用
 ///
 struct Weather<F> where F: Fn(&str, &str) {
-    list: Vec<F>
+    list: Vec<Box<F>>
 }
 
 ///
@@ -20,7 +20,7 @@ struct Weather<F> where F: Fn(&str, &str) {
 /// 回调 fn 参数是两个字符串引用
 ///
 struct Weather2<'a, F> where F: Fn(&str, &str) {
-    list: HashMap<&'a str, F>
+    list: HashMap<&'a str, Box<F>>
 }
 
 ///
@@ -29,7 +29,7 @@ struct Weather2<'a, F> where F: Fn(&str, &str) {
 /// 回调 fn 参数是一个 源结构体
 ///
 struct Weather3<'a, F> where F: Fn(Source) -> bool {
-    list: HashMap<&'a str, F>
+    list: HashMap<&'a str, Box<F>>
 }
 
 ///
@@ -37,7 +37,7 @@ struct Weather3<'a, F> where F: Fn(Source) -> bool {
 ///
 impl<F: Fn(&str, &str)> Weather<F> {
     fn listen(&mut self, f: F) {
-        self.list.push(f);
+        self.list.push(Box::new(f));
     }
 
     fn publish(&self, weather: &str, wind: &str) {
@@ -52,7 +52,7 @@ impl<F: Fn(&str, &str)> Weather<F> {
 ///
 impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
     fn listen(&mut self, k: &'a str, f: F) {
-        self.list.insert(k, f);
+        self.list.insert(k, Box::new(f));
     }
 
     fn unlisten(&mut self, k: &'a str) -> bool {
@@ -78,7 +78,7 @@ impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
 ///
 impl<'a, F: Fn(Source) -> bool> Weather3<'a, F> {
     fn listen(&mut self, k: &'a str, f: F) {
-        self.list.insert(k, f);
+        self.list.insert(k, Box::new(f));
     }
 
     fn unlisten(&mut self, k: &'a str) -> bool {
