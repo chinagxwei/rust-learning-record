@@ -1,12 +1,19 @@
-
 ///
 /// 通过工厂生产水果
 ///
 
 ///
-/// 水果类型
+/// 水果类型推导
 ///
 pub enum Fruit {
+    Apple(Box<Apple>),
+    Banana(Box<Banana>),
+}
+
+///
+/// 水果类型
+///
+pub enum FruitKind {
     Apple,
     Banana,
 }
@@ -16,7 +23,7 @@ pub enum Fruit {
 ///
 pub trait FruitTrait {
     fn eat(&self);
-    fn action(&self, origin: &String, kind: &Fruit) {
+    fn action(&self, origin: &String, kind: &FruitKind) {
         println!("产地 {} 的 {} 可以吃！", origin, kind.as_str())
     }
 }
@@ -26,7 +33,7 @@ pub trait FruitTrait {
 ///
 pub struct Apple {
     origin: String,
-    kind: Fruit,
+    kind: FruitKind,
 }
 
 ///
@@ -34,17 +41,17 @@ pub struct Apple {
 ///
 pub struct Banana {
     origin: String,
-    kind: Fruit,
+    kind: FruitKind,
 }
 
 ///
 /// 类型实现
 ///
-impl Fruit {
+impl FruitKind {
     fn as_str(&self) -> &'static str {
         match *self {
-            Fruit::Apple => "苹果",
-            Fruit::Banana => "香蕉",
+            FruitKind::Apple => "苹果",
+            FruitKind::Banana => "香蕉",
         }
     }
 }
@@ -53,7 +60,7 @@ impl Fruit {
 /// 苹果实现
 ///
 impl Apple {
-    pub fn new(origin: String, kind: Fruit) -> Apple {
+    pub fn new(origin: String, kind: FruitKind) -> Apple {
         Apple { origin, kind }
     }
 }
@@ -71,7 +78,7 @@ impl FruitTrait for Apple {
 /// 香蕉实现
 ///
 impl Banana {
-    pub fn new(origin: String, kind: Fruit) -> Banana {
+    pub fn new(origin: String, kind: FruitKind) -> Banana {
         Banana { origin, kind }
     }
 }
@@ -94,10 +101,10 @@ struct Factory;
 /// 工厂实现
 ///
 impl Factory {
-    pub fn get_instance(kind: Fruit) -> Box<FruitTrait> {
+    pub fn get_instance(kind: FruitKind) -> Fruit {
         match kind {
-            Fruit::Apple => Box::new(Apple::new("美国".to_string(), Fruit::Apple)),
-            Fruit::Banana => Box::new(Banana::new("泰国".to_string(), Fruit::Banana)),
+            FruitKind::Apple => Fruit::Apple(Box::new(Apple::new("美国".to_string(), FruitKind::Apple))),
+            FruitKind::Banana => Fruit::Banana(Box::new(Banana::new("泰国".to_string(), FruitKind::Banana))),
         }
     }
 }
@@ -105,20 +112,12 @@ impl Factory {
 
 fn main() {
 
-    ///
-    /// 创建一个苹果实例
-    ///
+    if let Fruit::Apple(apple) = Factory::get_instance(FruitKind::Apple){
+        apple.eat();
+    }
 
-    let apple: Box<FruitTrait> = Factory::get_instance(Fruit::Apple);
-//
-    apple.eat();
 
-    ///
-    /// 创建一个香蕉实例
-    ///
-
-    let banana: Box<FruitTrait> = Factory::get_instance(Fruit::Banana);
-
-    banana.eat();
-
+    if let Fruit::Banana(banana) = Factory::get_instance(FruitKind::Banana){
+        banana.eat();
+    }
 }
