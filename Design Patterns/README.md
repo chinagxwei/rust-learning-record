@@ -3,3 +3,5 @@
 `example_mode_2（代理模式）`
 
 `example_mode_3（工厂模式）`
+
+`example_mode_4（享源模式）`
