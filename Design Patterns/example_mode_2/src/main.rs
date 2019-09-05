@@ -19,8 +19,8 @@ struct Boy {
 ///
 /// 一般代理结构
 ///
-struct Proxy<'a> {
-    boy: &'a Boy
+struct Proxy {
+    boy: Boy
 }
 
 ///
@@ -46,8 +46,8 @@ impl Boy {
 ///
 /// 一般代理
 ///
-impl<'a> Proxy<'a> {
-    fn new(b: &'a Boy) -> Proxy {
+impl Proxy {
+    fn new(b: Boy) -> Proxy {
         Proxy { boy: b }
     }
 
@@ -82,7 +82,7 @@ impl<'a> Proxy2<'a> {
 fn main() {
 //    println!("Hello, world!");
     let b: Boy = Boy::new("小明".to_string());
-    let p: Proxy = Proxy::new(&b);
+    let p: Proxy = Proxy::new(b);
 
     p.buy_cookie(Cookie { name: "曲奇".to_string() });
 
