@@ -130,7 +130,7 @@ fn main() {
 
     brm.extend_checkout_status("1".to_string(), (86400 as u64));
 
-    println!("{:?}", brm);
+//    println!("{:?}", brm);
 
     assert_eq!(brm.is_past_due("1".to_string()), false);
 }
