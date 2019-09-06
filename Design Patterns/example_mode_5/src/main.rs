@@ -1,3 +1,6 @@
+///
+/// 下载状态特性
+///
 trait State {
     fn download(self: Box<Self>) -> Box<dyn State>;
     fn pause(self: Box<Self>) -> Box<dyn State>;
@@ -5,41 +8,39 @@ trait State {
     fn finish(self: Box<Self>) -> Box<dyn State>;
 }
 
+///
+/// 读取状态结构
+///
 struct ReadState {
     state: Option<Box<dyn State>>
 }
 
+///
+/// 读取状态结构实现
+///
 impl ReadState {
     fn new() -> ReadState {
         ReadState { state: Some(Box::new(Download {}))}
     }
-}
 
-impl ReadState {
     fn download(&mut self) {
         if let Some(state) = self.state.take(){
             self.state = Some(state.download())
         }
     }
-}
 
-impl ReadState {
     fn pause(&mut self) {
         if let Some(state) = self.state.take(){
             self.state = Some(state.pause())
         }
     }
-}
 
-impl ReadState {
     fn fail(&mut self) {
         if let Some(state) = self.state.take(){
             self.state = Some(state.fail())
         }
     }
-}
 
-impl ReadState {
     fn finish(&mut self) {
         if let Some(state) = self.state.take(){
             self.state = Some(state.finish())
@@ -47,14 +48,29 @@ impl ReadState {
     }
 }
 
+///
+/// 下载状态结构
+///
 struct Download;
 
+///
+/// 暂停状态结构
+///
 struct Pause;
 
-struct Fail;
-
+///
+/// 完成状态结构
+///
 struct Finish;
 
+///
+/// 失败状态结构
+///
+struct Fail;
+
+///
+/// 下载状态结构实现
+///
 impl State for Download {
     fn download(self: Box<Self>) -> Box<dyn State> {
         println!("下载中");
@@ -77,6 +93,9 @@ impl State for Download {
     }
 }
 
+///
+/// 暂停状态结构实现
+///
 impl State for Pause {
     fn download(self: Box<Self>) -> Box<dyn State> {
         println!("继续下载");
@@ -84,7 +103,7 @@ impl State for Pause {
     }
 
     fn pause(self: Box<Self>) -> Box<dyn State> {
-        println!("暂停中");
+        println!("暂停中无法暂停");
         self
     }
 
@@ -99,6 +118,9 @@ impl State for Pause {
     }
 }
 
+///
+/// 完成状态结构实现
+///
 impl State for Finish {
     fn download(self: Box<Self>) -> Box<dyn State> {
         println!("重新下载");
@@ -121,6 +143,9 @@ impl State for Finish {
     }
 }
 
+///
+/// 失败状态结构实现
+///
 impl State for Fail {
     fn download(self: Box<Self>) -> Box<dyn State> {
         println!("尝试重新下载");
@@ -146,6 +171,8 @@ fn main() {
     let mut rs = ReadState::new();
     rs.download();
     rs.fail();
+    rs.pause();
+    rs.download();
     rs.pause();
     rs.download();
     rs.finish();
