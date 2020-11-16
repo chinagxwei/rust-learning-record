@@ -1,6 +1,8 @@
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::fmt::{Display, Formatter};
 use std::fmt;
+use std::cell::RefCell;
+use std::borrow::Borrow;
 
 #[derive(Debug, Copy, Clone)]
 enum CarType {
@@ -69,22 +71,24 @@ impl GPSNavigator {
 }
 
 struct TripComputer {
-    car: Option<Rc<Car>>
+    car: Option<RefCell<Weak<Car>>>
 }
 
 impl TripComputer {
-    fn set_car(&mut self, car: Option<Rc<Car>>) {
+    fn set_car(&mut self, car: Option<RefCell<Weak<Car>>>) {
         self.car = car
     }
 
     fn show_fuel_level(&self) {
-        if self.car.is_some() {
-            println!("Fuel level: {}", self.car.as_ref().unwrap().get_fuel());
+        let car = self.car.as_ref().unwrap().borrow().upgrade();
+        if car.is_some() {
+            println!("Fuel level: {}", car.as_ref().unwrap().get_fuel());
         }
     }
 
     fn show_status(&self) {
-        if self.car.is_some() && self.car.as_ref().unwrap().get_engine().is_started() {
+        let car = self.car.as_ref().unwrap().borrow().upgrade();
+        if car.is_some() && car.as_ref().unwrap().get_engine().is_started() {
             println!("Car is started")
         } else {
             println!("Car isn't started")
