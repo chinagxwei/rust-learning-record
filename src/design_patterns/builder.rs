@@ -71,23 +71,23 @@ impl GPSNavigator {
 }
 
 struct TripComputer {
-    car: Option<RefCell<Weak<Car>>>
+    car: Option<Weak<Car>>
 }
 
 impl TripComputer {
-    fn set_car(&mut self, car: Option<RefCell<Weak<Car>>>) {
+    fn set_car(&mut self, car: Option<Weak<Car>>) {
         self.car = car
     }
 
     fn show_fuel_level(&self) {
-        let car = self.car.as_ref().unwrap().borrow().upgrade();
+        let car = self.car.as_ref().unwrap().upgrade();
         if car.is_some() {
             println!("Fuel level: {}", car.as_ref().unwrap().get_fuel());
         }
     }
 
     fn show_status(&self) {
-        let car = self.car.as_ref().unwrap().borrow().upgrade();
+        let car = self.car.as_ref().unwrap().upgrade();
         if car.is_some() && car.as_ref().unwrap().get_engine().is_started() {
             println!("Car is started")
         } else {
