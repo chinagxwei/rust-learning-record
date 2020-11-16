@@ -5,3 +5,4 @@ mod proxy_2;
 mod flyweight;
 mod adapter;
 mod builder;
+mod state;
