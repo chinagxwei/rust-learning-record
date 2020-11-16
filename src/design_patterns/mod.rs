@@ -6,3 +6,4 @@ mod flyweight;
 mod adapter;
 mod builder;
 mod state;
+mod observer;
