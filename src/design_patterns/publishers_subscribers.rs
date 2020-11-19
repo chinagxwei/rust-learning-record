@@ -103,7 +103,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_observer() {
+    fn test_subscribers() {
         ///
         /// 1号实体案例调用
         ///
