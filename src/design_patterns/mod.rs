@@ -8,3 +8,4 @@ mod builder;
 mod state;
 mod publishers_subscribers;
 mod strategy;
+mod intercepting_filter;
