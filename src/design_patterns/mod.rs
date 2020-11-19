@@ -9,3 +9,4 @@ mod state;
 mod publishers_subscribers;
 mod strategy;
 mod intercepting_filter;
+mod service_locator;

@@ -126,7 +126,7 @@ mod tests {
     
     #[test]
     fn test_flyweight() {
-        let mut bf = BookFactory::new();
+        let bf = BookFactory::new();
 
         let mut brm = BookRecordManager::new(bf);
 
