@@ -7,3 +7,4 @@ mod adapter;
 mod builder;
 mod state;
 mod publishers_subscribers;
+mod strategy;
