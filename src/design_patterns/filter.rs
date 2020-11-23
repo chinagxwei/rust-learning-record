@@ -1,4 +1,5 @@
 use std::thread::sleep;
+use std::rc::Rc;
 
 trait Criteria {
     fn meet_criteria(&self, person: &Vec<Person>) -> Vec<Person>;
@@ -100,12 +101,12 @@ impl Criteria for CriteriaSingle {
 }
 
 struct AndCriteria {
-    criteria: Box<dyn Criteria>,
-    other_criteria: Box<dyn Criteria>,
+    criteria: Rc<dyn Criteria>,
+    other_criteria: Rc<dyn Criteria>,
 }
 
 impl AndCriteria {
-    fn new(criteria: Box<dyn Criteria>, other_criteria: Box<dyn Criteria>) -> AndCriteria {
+    fn new(criteria: Rc<dyn Criteria>, other_criteria: Rc<dyn Criteria>) -> AndCriteria {
         AndCriteria { criteria, other_criteria }
     }
 }
@@ -118,12 +119,12 @@ impl Criteria for AndCriteria {
 }
 
 struct OrCriteria {
-    criteria: Box<dyn Criteria>,
-    other_criteria: Box<dyn Criteria>,
+    criteria: Rc<dyn Criteria>,
+    other_criteria: Rc<dyn Criteria>,
 }
 
 impl OrCriteria {
-    fn new(criteria: Box<dyn Criteria>, other_criteria: Box<dyn Criteria>) -> OrCriteria {
+    fn new(criteria: Rc<dyn Criteria>, other_criteria: Rc<dyn Criteria>) -> OrCriteria {
         OrCriteria { criteria, other_criteria }
     }
 }
@@ -194,17 +195,18 @@ mod tests {
             ),
         ];
 
-        let male = CriteriaMale::new();
-        let female = CriteriaFemale::new();
-        let single = CriteriaSingle::new();
+        let male = Rc::new(CriteriaMale::new());
+        let female = Rc::new(CriteriaFemale::new());
+        let single = Rc::new(CriteriaSingle::new());
+
+        let single_male = AndCriteria::new(single.clone(), male.clone());
+        let single_or_female = OrCriteria::new(single.clone(), female.clone());
+
         println!("Males: ");
         print(&male.meet_criteria(&persons));
 
         println!("\nFemales: ");
         print(&female.meet_criteria(&persons));
-
-        let single_male = AndCriteria::new(Box::new(single.clone()), Box::new(male));
-        let single_or_female = OrCriteria::new(Box::new(single.clone()), Box::new(female));
 
         println!("\nSingle Males: ");
         print(&single_male.meet_criteria(&persons));
