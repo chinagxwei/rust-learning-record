@@ -101,8 +101,8 @@ struct Car {
     seats: i32,
     engine: Engine,
     transmission: Transmission,
-    trip_computer: TripComputer,
-    gps_navigator: GPSNavigator,
+    trip_computer: Option<TripComputer>,
+    gps_navigator: Option<GPSNavigator>,
     fuel: f64,
 }
 
@@ -112,8 +112,8 @@ impl Car {
         seats: i32,
         engine: Engine,
         transmission: Transmission,
-        trip_computer: TripComputer,
-        gps_navigator: GPSNavigator,
+        trip_computer: Option<TripComputer>,
+        gps_navigator: Option<GPSNavigator>,
     ) -> Car {
         Car {
             car_type,
@@ -145,11 +145,11 @@ impl Car {
     }
 
     fn get_trip_computer(&self) -> &TripComputer {
-        &self.trip_computer
+        &self.trip_computer.as_ref().unwrap()
     }
 
     fn get_gps_navigator(&self) -> &GPSNavigator {
-        &self.gps_navigator
+        &self.gps_navigator.as_ref().unwrap()
     }
 
     fn set_fuel(&mut self, fuel: f64) {
@@ -315,8 +315,8 @@ impl Builder<Car> for CarBuilder {
             self.seats.take().unwrap(),
             self.engine.take().unwrap(),
             self.transmission.take().unwrap(),
-            self.trip_computer.take().unwrap(),
-            self.gps_navigator.take().unwrap(),
+            self.trip_computer.take(),
+            self.gps_navigator.take(),
         )
     }
 }
