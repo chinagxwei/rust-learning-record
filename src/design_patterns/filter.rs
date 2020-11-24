@@ -100,36 +100,36 @@ impl Criteria for CriteriaSingle {
     }
 }
 
-struct AndCriteria {
-    criteria: Rc<dyn Criteria>,
-    other_criteria: Rc<dyn Criteria>,
+struct AndCriteria<'a, 'b> {
+    criteria: Box<&'a dyn Criteria>,
+    other_criteria: Box<&'b dyn Criteria>,
 }
 
-impl AndCriteria {
-    fn new(criteria: Rc<dyn Criteria>, other_criteria: Rc<dyn Criteria>) -> AndCriteria {
+impl<'a, 'b> AndCriteria<'a, 'b> {
+    fn new(criteria: Box<&'a dyn Criteria>, other_criteria: Box<&'b dyn Criteria>) -> AndCriteria<'a, 'b> {
         AndCriteria { criteria, other_criteria }
     }
 }
 
-impl Criteria for AndCriteria {
+impl Criteria for AndCriteria<'_, '_> {
     fn meet_criteria(&self, person: &Vec<Person>) -> Vec<Person> {
         let first = self.criteria.meet_criteria(person);
         self.other_criteria.meet_criteria(&first)
     }
 }
 
-struct OrCriteria {
-    criteria: Rc<dyn Criteria>,
-    other_criteria: Rc<dyn Criteria>,
+struct OrCriteria<'a, 'b> {
+    criteria: Box<&'a dyn Criteria>,
+    other_criteria: Box<&'b dyn Criteria>,
 }
 
-impl OrCriteria {
-    fn new(criteria: Rc<dyn Criteria>, other_criteria: Rc<dyn Criteria>) -> OrCriteria {
+impl<'a, 'b> OrCriteria<'a, 'b> {
+    fn new(criteria: Box<&'a dyn Criteria>, other_criteria: Box<&'b dyn Criteria>) -> OrCriteria<'a, 'b> {
         OrCriteria { criteria, other_criteria }
     }
 }
 
-impl Criteria for OrCriteria {
+impl Criteria for OrCriteria<'_, '_> {
     fn meet_criteria(&self, person: &Vec<Person>) -> Vec<Person> {
         let mut first = self.criteria.meet_criteria(person);
         let second = self.other_criteria.meet_criteria(person);
@@ -195,12 +195,12 @@ mod tests {
             ),
         ];
 
-        let male = Rc::new(CriteriaMale::new());
-        let female = Rc::new(CriteriaFemale::new());
-        let single = Rc::new(CriteriaSingle::new());
+        let male = CriteriaMale::new();
+        let female = CriteriaFemale::new();
+        let single = CriteriaSingle::new();
 
-        let single_male = AndCriteria::new(single.clone(), male.clone());
-        let single_or_female = OrCriteria::new(single.clone(), female.clone());
+        let single_male = AndCriteria::new(Box::new(&single), Box::new(&male));
+        let single_or_female = OrCriteria::new(Box::new(&single), Box::new(&single));
 
         println!("Males: ");
         print(&male.meet_criteria(&persons));
