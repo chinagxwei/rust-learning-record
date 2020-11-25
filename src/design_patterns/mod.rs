@@ -1,5 +1,5 @@
 mod abstract_factory;
-mod abstract_factory_2;
+mod factory;
 mod proxy;
 mod proxy_2;
 mod flyweight;
@@ -12,3 +12,5 @@ mod intercepting_filter;
 mod service_locator;
 mod data_access_object;
 mod filter;
+mod factory_2;
+mod abstract_factory_2;
