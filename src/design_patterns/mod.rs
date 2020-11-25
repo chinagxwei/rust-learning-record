@@ -14,3 +14,6 @@ mod data_access_object;
 mod filter;
 mod factory_2;
 mod abstract_factory_2;
+mod bridge;
+mod observer;
+mod adapter_2;
