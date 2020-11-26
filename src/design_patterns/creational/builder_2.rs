@@ -1,8 +1,6 @@
 use std::rc::{Rc, Weak};
 use std::fmt::{Display, Formatter};
 use std::fmt;
-use std::cell::RefCell;
-use std::borrow::Borrow;
 
 #[derive(Debug, Copy, Clone)]
 enum CarType {

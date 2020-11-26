@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::time::SystemTime;
@@ -132,7 +131,7 @@ mod tests {
 
         brm.add_book_record(1, "Rust 编程".to_string(), "alex".to_string(), "1");
 
-        brm.extend_checkout_status("1".to_string(), (86400 as u64));
+        brm.extend_checkout_status("1".to_string(), 86400);
 
 //    println!("{:?}", brm);
 

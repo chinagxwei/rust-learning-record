@@ -1,6 +1,3 @@
-use std::thread::sleep;
-use std::rc::Rc;
-
 trait Criteria {
     fn meet_criteria(&self, person: &Vec<Person>) -> Vec<Person>;
 }
@@ -162,7 +159,7 @@ mod tests {
 
     #[test]
     fn test_filter() {
-        let mut persons = vec![
+        let persons = vec![
             Person::new(
                 String::from("Robert"),
                 String::from("Male"),

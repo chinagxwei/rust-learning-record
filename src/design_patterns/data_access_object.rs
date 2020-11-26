@@ -1,7 +1,3 @@
-use std::cell::RefCell;
-use std::ops::Deref;
-use std::borrow::BorrowMut;
-
 trait StudentDao {
     fn get_all_students(&self) -> Vec<Student>;
     fn get_student(&self, index: usize) -> Student;

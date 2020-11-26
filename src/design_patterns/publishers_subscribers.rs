@@ -56,7 +56,7 @@ impl<'a, F: Fn(&str, &str)> Weather2<'a, F> {
     }
 
     fn unlisten(&mut self, k: &'a str) -> bool {
-        if let Some(v) = self.list.remove(k) {
+        if let Some(_v) = self.list.remove(k) {
             true
         } else {
             false
@@ -82,7 +82,7 @@ impl<'a, F: Fn(Source) -> bool> Weather3<'a, F> {
     }
 
     fn unlisten(&mut self, k: &'a str) -> bool {
-        if let Some(v) = self.list.remove(k) {
+        if let Some(_v) = self.list.remove(k) {
             true
         } else {
             false

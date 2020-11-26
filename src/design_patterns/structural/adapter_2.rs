@@ -40,7 +40,7 @@ impl AdvancedMediaPlayer for VlcPlayer {
         println!("Playing vlc file. Name: {}", file_name);
     }
 
-    fn play_mp4(&self, file_name: String) {
+    fn play_mp4(&self, _file_name: String) {
         unimplemented!()
     }
 }
@@ -48,7 +48,7 @@ impl AdvancedMediaPlayer for VlcPlayer {
 struct Mp4Player;
 
 impl AdvancedMediaPlayer for Mp4Player {
-    fn play_vlc(&self, file_name: String) {
+    fn play_vlc(&self, _file_name: String) {
         unimplemented!()
     }
 

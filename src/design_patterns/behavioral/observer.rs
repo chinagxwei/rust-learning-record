@@ -1,6 +1,3 @@
-use std::rc::{Rc, Weak};
-use std::cell::RefCell;
-
 trait Observer {
     fn update(&self, state: i32);
 }
