@@ -3,3 +3,7 @@ mod adapter_2;
 mod bridge;
 mod filter;
 mod flyweight;
+mod composite;
+mod facade;
+mod decorator;
+mod flyweight_2;

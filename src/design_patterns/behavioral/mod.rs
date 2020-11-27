@@ -7,3 +7,5 @@ mod strategy;
 mod command;
 mod iterator;
 mod visitor;
+mod mediator;
+mod memento;
