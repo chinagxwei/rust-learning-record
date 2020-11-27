@@ -6,3 +6,4 @@ mod state;
 mod strategy;
 mod command;
 mod iterator;
+mod visitor;
