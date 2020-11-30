@@ -78,6 +78,7 @@ mod tests {
         let get_random_y = |i: usize| -> i32 { (i + 2) as i32 };
 
         let sf = ShapeFactory::new();
+
         for index in 0..20 {
             let c = &sf.get_circle(get_random_color(index));
             c.borrow_mut().set_radius(100);

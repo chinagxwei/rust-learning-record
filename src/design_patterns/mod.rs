@@ -5,3 +5,4 @@ mod data_access_object;
 mod behavioral;
 mod creational;
 mod structural;
+mod model_view_controller;
