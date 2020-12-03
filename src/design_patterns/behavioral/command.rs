@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 trait Order {
     fn execute(&self);
 }
@@ -25,50 +23,50 @@ impl Stock {
     }
 }
 
-struct BuyStock {
-    stock: Rc<Stock>
+struct BuyStock<'a> {
+    stock: &'a Stock
 }
 
-impl BuyStock {
-    fn new(stock: Rc<Stock>) -> BuyStock {
+impl<'a> BuyStock<'a> {
+    fn new(stock: &'a Stock) -> BuyStock {
         BuyStock { stock }
     }
 }
 
-impl Order for BuyStock {
+impl Order for BuyStock<'_> {
     fn execute(&self) {
         self.stock.buy();
     }
 }
 
-struct SellStock {
-    stock: Rc<Stock>
+struct SellStock<'a> {
+    stock: &'a Stock
 }
 
-impl SellStock {
-    fn new(stock: Rc<Stock>) -> SellStock {
+impl<'a> SellStock<'a> {
+    fn new(stock: &'a Stock) -> SellStock {
         SellStock { stock }
     }
 }
 
-impl Order for SellStock {
+impl Order for SellStock<'_> {
     fn execute(&self) {
         self.stock.sell();
     }
 }
 
-struct Broker {
-    order_list: Vec<Box<dyn Order>>
+struct Broker<'a> {
+    order_list: Vec<Box<&'a dyn Order>>
 }
 
-impl Broker {
-    fn new() -> Broker {
+impl <'a>Broker<'a> {
+    fn new() -> Broker<'a> {
         Broker { order_list: vec![] }
     }
 }
 
-impl Broker {
-    fn take_order(&mut self, order: Box<dyn Order>) {
+impl<'a> Broker<'a> {
+    fn take_order(&mut self, order: Box<&'a dyn Order>) {
         self.order_list.push(order);
     }
 
@@ -88,12 +86,12 @@ mod tests {
 
     #[test]
     fn test_command() {
-        let stock = Rc::new(Stock::new(String::from("ABC"), 10));
-        let buy_stock_order = BuyStock::new(stock.clone());
-        let sell_stock_order = SellStock::new(stock.clone());
+        let stock = Stock::new(String::from("ABC"), 10);
+        let buy_stock_order = BuyStock::new(&stock);
+        let sell_stock_order = SellStock::new(&stock);
         let mut broker = Broker::new();
-        broker.take_order(Box::new(buy_stock_order));
-        broker.take_order(Box::new(sell_stock_order));
+        broker.take_order(Box::new(&buy_stock_order));
+        broker.take_order(Box::new(&sell_stock_order));
         broker.place_orders();
     }
 }

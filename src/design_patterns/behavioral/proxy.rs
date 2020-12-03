@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 trait Subject {
     fn request(&self);
 }
@@ -18,17 +16,17 @@ impl Subject for RealSubject {
     }
 }
 
-struct Proxy {
-    real_subject: Rc<RealSubject>
+struct Proxy<'a> {
+    real_subject: &'a RealSubject
 }
 
-impl Proxy {
-    fn new(real_subject: Rc<RealSubject>) -> Proxy {
+impl<'a> Proxy<'a> {
+    fn new(real_subject: &'a RealSubject) -> Proxy<'a> {
         Proxy { real_subject }
     }
 }
 
-impl Proxy {
+impl Proxy<'_> {
     fn check_access(&self) -> bool {
         println!("Proxy: Checking access prior to firing a real request.");
         true
@@ -39,7 +37,7 @@ impl Proxy {
     }
 }
 
-impl Subject for Proxy {
+impl Subject for Proxy<'_> {
     fn request(&self) {
         if self.check_access() {
             self.real_subject.request();
@@ -48,7 +46,7 @@ impl Subject for Proxy {
     }
 }
 
-fn client_code(subject: Rc<dyn Subject>) {
+fn client_code<'a>(subject: Box<&'a dyn Subject>) {
     subject.request();
 }
 
@@ -59,12 +57,12 @@ mod tests {
     #[test]
     fn test_proxy() {
         println!("Client: Executing the client code with a real subject:");
-        let real_subject = Rc::new(RealSubject::new());
-        client_code(real_subject.clone());
+        let real_subject = RealSubject::new();
+        client_code(Box::new(&real_subject));
 
         println!(" ");
         println!("Client: Executing the same client code with a proxy:");
-        let proxy = Proxy::new(real_subject.clone());
-        client_code(Rc::new(proxy));
+        let proxy = Proxy::new(&real_subject);
+        client_code(Box::new(&proxy));
     }
 }

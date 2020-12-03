@@ -80,7 +80,7 @@ mod tests {
         let sf = ShapeFactory::new();
 
         for index in 0..20 {
-            let c = &sf.get_circle(get_random_color(index));
+            let c = sf.get_circle(get_random_color(index));
             c.borrow_mut().set_radius(100);
 
             c.borrow_mut().set_x(get_random_x(index));

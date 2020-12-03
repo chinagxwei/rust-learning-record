@@ -46,6 +46,14 @@ impl Shape for ShapeDecorator {
     }
 }
 
+trait AbsShapeDecorator {
+    fn get_shape_decorator(&self) -> &ShapeDecorator;
+    fn draw(&self) {
+        self.get_shape_decorator()
+            .draw();
+    }
+}
+
 struct RedShapeDecorator {
     shape_decorator: ShapeDecorator
 }
@@ -62,7 +70,11 @@ impl RedShapeDecorator {
     }
 }
 
-impl Shape for RedShapeDecorator {
+impl AbsShapeDecorator for RedShapeDecorator {
+    fn get_shape_decorator(&self) -> &ShapeDecorator {
+        &self.shape_decorator
+    }
+
     fn draw(&self) {
         self.shape_decorator.draw();
         self.set_red_border(Box::new(&self.shape_decorator));
