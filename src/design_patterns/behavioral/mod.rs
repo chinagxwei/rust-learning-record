@@ -9,3 +9,4 @@ mod iterator;
 mod visitor;
 mod mediator;
 mod memento;
+mod template;
