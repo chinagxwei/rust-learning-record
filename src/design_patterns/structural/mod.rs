@@ -7,3 +7,5 @@ mod composite;
 mod facade;
 mod decorator;
 mod flyweight_2;
+mod proxy;
+mod proxy_2;
