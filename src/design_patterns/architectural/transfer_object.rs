@@ -76,9 +76,9 @@ mod tests {
     fn test_transfer_object() {
         let mut student_bo = StudentBO::new();
 
-        for i in student_bo.get_students().iter() {
-            println!("Student: [RollNo : {}, Name : {} ]", i.roll_no, i.name)
-        }
+        student_bo.get_students()
+            .iter()
+            .for_each(|x| println!("Student: [RollNo : {}, Name : {} ]", x.roll_no, x.name));
 
         student_bo.set_student_name(0, "Michael");
         let student = student_bo.get_student(0);

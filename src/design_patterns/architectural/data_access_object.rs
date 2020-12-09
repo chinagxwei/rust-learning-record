@@ -83,9 +83,9 @@ mod tests {
     fn test_data_access() {
         let mut student_dao = StudentDaoImpl::new();
 
-        for student in student_dao.get_all_students().iter() {
-            println!("Student: [RollNo : {}, Name : {} ]", student.get_roll_no(), student.get_name())
-        }
+        student_dao.get_all_students()
+            .iter()
+            .for_each(|x| println!("Student: [RollNo : {}, Name : {} ]", x.get_roll_no(), x.get_name()));
 
         let mut student = student_dao.get_student(0);
         student.set_name(String::from("Michael"));

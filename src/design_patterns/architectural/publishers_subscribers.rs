@@ -41,9 +41,9 @@ impl<F: Fn(&str, &str)> Weather<F> {
     }
 
     fn publish(&self, weather: &str, wind: &str) {
-        for fun in &self.list {
-            fun(weather, wind);
-        }
+        &self.list
+            .iter()
+            .for_each(|fun| fun(weather, wind));
     }
 }
 

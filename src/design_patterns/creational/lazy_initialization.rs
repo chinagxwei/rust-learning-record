@@ -36,9 +36,10 @@ impl Fruits {
 
     fn print(&self) {
         println!("Number of instances made: {}", self.types.borrow().len());
-        for (k, _) in self.types.borrow().iter() {
-            println!("{}", *k);
-        }
+        self.types
+            .borrow()
+            .iter()
+            .for_each(|(k,_)| println!("{}", *k));
         print!("\n");
     }
 }
