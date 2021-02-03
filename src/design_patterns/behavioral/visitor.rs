@@ -5,7 +5,6 @@
 //! 根据模式，元素对象已接受访问者对象，这样访问者对象就可以处理元素对象上的操作。
 //!
 
-use std::rc::Rc;
 use std::fmt::{Display, Formatter};
 
 enum ComputerPartType {

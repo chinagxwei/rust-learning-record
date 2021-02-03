@@ -85,17 +85,17 @@ impl State for Download {
 
     fn pause(self: Box<Self>) -> Box<dyn State> {
         println!("暂停下载");
-        Box::new(Pause {})
+        Box::new(Pause)
     }
 
     fn fail(self: Box<Self>) -> Box<dyn State> {
         println!("下载失败");
-        Box::new(Fail {})
+        Box::new(Fail)
     }
 
     fn finish(self: Box<Self>) -> Box<dyn State> {
         println!("下载完成");
-        Box::new(Finish {})
+        Box::new(Finish)
     }
 }
 
@@ -105,7 +105,7 @@ impl State for Download {
 impl State for Pause {
     fn download(self: Box<Self>) -> Box<dyn State> {
         println!("继续下载");
-        Box::new(Download {})
+        Box::new(Download)
     }
 
     fn pause(self: Box<Self>) -> Box<dyn State> {
@@ -115,12 +115,12 @@ impl State for Pause {
 
     fn fail(self: Box<Self>) -> Box<dyn State> {
         println!("下载失败");
-        Box::new(Fail {})
+        Box::new(Fail)
     }
 
     fn finish(self: Box<Self>) -> Box<dyn State> {
         println!("下载完成");
-        Box::new(Finish {})
+        Box::new(Finish)
     }
 }
 
@@ -130,7 +130,7 @@ impl State for Pause {
 impl State for Finish {
     fn download(self: Box<Self>) -> Box<dyn State> {
         println!("重新下载");
-        Box::new(Download {})
+        Box::new(Download)
     }
 
     fn pause(self: Box<Self>) -> Box<dyn State> {
@@ -155,7 +155,7 @@ impl State for Finish {
 impl State for Fail {
     fn download(self: Box<Self>) -> Box<dyn State> {
         println!("尝试重新下载");
-        Box::new(Download {})
+        Box::new(Download)
     }
 
     fn pause(self: Box<Self>) -> Box<dyn State> {
