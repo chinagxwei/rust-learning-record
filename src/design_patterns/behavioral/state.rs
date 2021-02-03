@@ -26,29 +26,29 @@ struct ReadState {
 ///
 impl ReadState {
     fn new() -> ReadState {
-        ReadState { state: Some(Box::new(Download {}))}
+        ReadState { state: Some(Box::new(Download)) }
     }
 
     fn download(&mut self) {
-        if let Some(state) = self.state.take(){
+        if let Some(state) = self.state.take() {
             self.state = Some(state.download())
         }
     }
 
     fn pause(&mut self) {
-        if let Some(state) = self.state.take(){
+        if let Some(state) = self.state.take() {
             self.state = Some(state.pause())
         }
     }
 
     fn fail(&mut self) {
-        if let Some(state) = self.state.take(){
+        if let Some(state) = self.state.take() {
             self.state = Some(state.fail())
         }
     }
 
     fn finish(&mut self) {
-        if let Some(state) = self.state.take(){
+        if let Some(state) = self.state.take() {
             self.state = Some(state.finish())
         }
     }
@@ -176,7 +176,7 @@ impl State for Fail {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn test_state() {
         let mut rs = ReadState::new();
