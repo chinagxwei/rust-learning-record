@@ -30,9 +30,11 @@ impl MyActor {
     }
 }
 
-async fn run_my_actor(mut actor: MyActor) {
-    while let Some(msg) = actor.receiver.recv().await {
-        actor.handle_message(msg)
+impl MyActor{
+    async fn run(&mut self){
+        while let Some(msg) = self.receiver.recv().await {
+            self.handle_message(msg)
+        }
     }
 }
 
@@ -44,13 +46,9 @@ pub struct MyActorHandle {
 impl MyActorHandle {
     pub fn new() -> Self {
         let (sender, receiver) = mpsc::channel(8);
-        let actor = MyActor::new(receiver);
-        tokio::spawn(run_my_actor(actor));
+        let mut actor = MyActor::new(receiver);
+        tokio::spawn(async move {actor.run().await});
         MyActorHandle { sender }
-    }
-
-    pub fn send(&self,msg:ActorMessage){
-        self.sender.send(msg).await;
     }
 
     pub async fn get_unique_id(&self) -> u32 {
