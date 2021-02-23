@@ -56,7 +56,7 @@ impl MyActorHandle {
         let msg = ActorMessage::GetUniqueID { respond_to: send };
 
         self.sender.send(msg).await;
-        recv.await.expect("ctor task has been killed")
+        recv.await.expect("actor task has been killed")
     }
 }
 
