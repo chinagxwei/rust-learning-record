@@ -1,4 +1,4 @@
-use crate::component_or_entity_system::example::Component;
+use crate::component_or_entity_system::example::{Component, Class};
 use uuid::Uuid;
 use crate::component_or_entity_system::example::manager::EntityManager;
 use std::rc::Rc;
@@ -94,7 +94,6 @@ impl MetaEntity {
     }
 }
 use std::fmt::Write as FmtWrite;
-use crate::component_or_entity_system::Class;
 
 impl std::fmt::Display for MetaEntity {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {

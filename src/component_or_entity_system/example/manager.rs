@@ -1,8 +1,7 @@
-use crate::component_or_entity_system::example::Component;
+use crate::component_or_entity_system::example::{Component, Class};
 use std::collections::{VecDeque, HashMap};
 use uuid::Uuid;
 use std::rc::Rc;
-use crate::component_or_entity_system::Class;
 
 #[derive(Debug)]
 pub struct EntityManager {
