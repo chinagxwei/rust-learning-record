@@ -1,7 +1,7 @@
-use crate::component_or_entity_system::example::Component;
 use uuid::Uuid;
-use crate::component_or_entity_system::example::manager::EntityManager;
-use std::rc::Rc;
+use crate::component_or_entity_system::example2::manager::EntityManager;
+use crate::component_or_entity_system::example2::Component;
+use std::any::TypeId;
 use std::collections::VecDeque;
 use std::fmt::Formatter;
 
@@ -23,13 +23,13 @@ impl MetaEntity {
         }
     }
 
-    fn new_by_name(name: String) -> MetaEntity {
+    pub fn new_by_name(name: String) -> MetaEntity {
         let mut entity = Self::_new();
         entity.internal_name = name;
         entity
     }
 
-    fn new_by_components<T: Component>(components: Vec<T>) -> MetaEntity {
+    pub fn new_by_components<T: Component + Clone>(components: Vec<T>) -> MetaEntity {
         let mut entity = Self::_new();
         for component in components {
             entity.add(component);
@@ -37,7 +37,7 @@ impl MetaEntity {
         entity
     }
 
-    fn new_by_name_and_components<T: Component>(name: String, components: Vec<T>) -> MetaEntity {
+    pub fn new_by_name_and_components<T: Component + Clone>(name: String, components: Vec<T>) -> MetaEntity {
         let mut entity = Self::new_by_name(name);
         for component in components {
             entity.add(component);
@@ -45,7 +45,7 @@ impl MetaEntity {
         entity
     }
 
-    fn new_by_uuid(entity: Uuid) -> MetaEntity {
+    pub fn new_by_uuid(entity: Uuid) -> MetaEntity {
         let mut manager = EntityManager::new();
         manager.set_entity(entity);
         MetaEntity {
@@ -61,16 +61,16 @@ impl MetaEntity {
 }
 
 impl MetaEntity {
-    fn has(&self, component_type: &Class) -> bool {
-        self.parent_entity_manager.has_component(&self.entity, component_type)
+    fn has<T: Component>(&self) -> bool {
+        self.parent_entity_manager.has_component::<T>(&self.entity)
     }
 
-    fn get(&mut self, component_type: &Class) -> Option<Rc<dyn Component>> {
-        self.parent_entity_manager.get_component(&self.entity, component_type)
+    fn get<T: Component + Clone>(&self) -> Option<T> {
+        self.parent_entity_manager.get_component::<T>(&self.entity)
     }
 
-    fn get_all(&self) -> Option<VecDeque<Rc<dyn Component>>> {
-        self.parent_entity_manager.get_all_components_on_entity(&self.entity)
+    fn get_all<T: Component + Clone>(&self) -> VecDeque<Option<T>> {
+        self.parent_entity_manager.get_all_components_on_entity::<T>(&self.entity)
     }
 }
 
@@ -79,43 +79,25 @@ impl MetaEntity {
         self.parent_entity_manager.add_component(self.entity, component);
     }
 
-    fn remove(&mut self, component: Rc<dyn Component>) -> Option<Rc<dyn Component>> {
-        self.parent_entity_manager.remove_component(&self.entity, component)
+    fn remove<T: Component>(&mut self) -> Option<T> {
+        self.parent_entity_manager.remove_component::<T>(&self.entity)
     }
 
-    fn remove_all(&mut self) {
-        for item in self.get_all().unwrap() {
-            self.remove(item);
-        }
+    fn remove_all<T: Component>(&mut self) {
+        self.parent_entity_manager.remove_all_component::<T>()
     }
 
     fn kill(&mut self) {
         self.parent_entity_manager.kill_entity(&self.entity);
     }
 }
-use std::fmt::Write as FmtWrite;
-use crate::component_or_entity_system::Class;
-
-impl std::fmt::Display for MetaEntity {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let mut buff = String::new();
-        for item in self.parent_entity_manager.get_all_components_on_entity(&self.entity).unwrap() {
-            if buff.len() > 0 {
-                write!(&mut buff, "{}", ", ")?;
-            }
-            write!(&mut buff, "{}", item)?;
-        }
-        write!(f, "Entity[{}:{}]({})", self.entity, self.internal_name, buff)
-    }
-}
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::component_or_entity_system::example::Class;
-    use std::fmt::Formatter;
+    use std::any::Any;
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     struct Position {
         x: f32,
         y: f32,
@@ -127,19 +109,13 @@ mod tests {
         }
     }
 
-    impl Component for Position {
-        fn get_type(&self) -> Class {
-            Class(String::from("core"))
-        }
-    }
-
     impl Position {
         pub fn new(x: f32, y: f32) -> Self {
             Position { x, y }
         }
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone)]
     struct Position2 {
         local: Position,
         target: Position,
@@ -148,12 +124,6 @@ mod tests {
     impl std::fmt::Display for Position2 {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
             write!(f, "({},{})", self.local, self.target)
-        }
-    }
-
-    impl Component for Position2 {
-        fn get_type(&self) -> Class {
-            Class(String::from("component"))
         }
     }
 
@@ -167,14 +137,9 @@ mod tests {
     fn test() {
         let p = Position::new(0.1, 0.2);
         let p2 = Position2::new(Position::new(0.3, 0.4), Position::new(0.5, 0.6));
-        println!("{}", p);
-        let class = p.get_type();
         let mut meta = MetaEntity::new_by_name(String::from("entity"));
         meta.add(p);
         meta.add(p2);
-        println!("{}", meta);
-        let a = meta.get(&class).unwrap();
-        meta.remove(a);
-        println!("{}", meta);
+        println!("{:#?}", meta);
     }
 }

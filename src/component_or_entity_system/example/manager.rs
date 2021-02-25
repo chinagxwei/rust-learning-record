@@ -1,7 +1,8 @@
-use crate::component_or_entity_system::example::{Component, Class};
+use crate::component_or_entity_system::example::Component;
 use std::collections::{VecDeque, HashMap};
 use uuid::Uuid;
 use std::rc::Rc;
+use crate::component_or_entity_system::Class;
 
 #[derive(Debug)]
 pub struct EntityManager {
@@ -126,6 +127,7 @@ impl EntityManager {
     }
 
     pub fn set_entity_name(&mut self, uuid: Uuid, name: String) {
+        self.set_entity(uuid);
         self.entity_human_readable_names.insert(uuid, name);
     }
 
