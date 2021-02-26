@@ -27,9 +27,13 @@ impl EntityManager {
 impl EntityManager {
     #[allow(map_clone)]
     pub fn get_component<T: Component + Clone>(&self, uuid: &Uuid) -> Option<T> {
-        println!("{}", self.component_stores.len());
+        self.get_component_by_type(uuid,&TypeId::of::<T>())
+    }
+
+    #[allow(map_clone)]
+    pub fn get_component_by_type<T: Component + Clone>(&self, uuid: &Uuid, component_id: &TypeId) -> Option<T> {
         self.component_stores
-            .get(&TypeId::of::<T>())
+            .get(component_id)
             .expect("get_component: type error")
             .get(uuid)
             .map(|x| {
@@ -38,7 +42,7 @@ impl EntityManager {
             }).map(Clone::clone)
     }
 
-    pub fn has_component_by_type_id(&self, uuid: &Uuid, component_id: &TypeId) -> bool {
+    pub fn has_component_by_type(&self, uuid: &Uuid, component_id: &TypeId) -> bool {
         if self.component_stores.contains_key(component_id) {
             return self.component_stores
                 .get(component_id)
@@ -49,7 +53,7 @@ impl EntityManager {
     }
 
     pub fn has_component<T: Component>(&self, uuid: &Uuid) -> bool {
-        self.has_component_by_type_id(uuid, &TypeId::of::<T>())
+        self.has_component_by_type(uuid, &TypeId::of::<T>())
     }
 
     #[allow(map_clone)]
@@ -70,9 +74,14 @@ impl EntityManager {
     }
 
     #[allow(map_clone)]
-    pub fn get_all_components_of_type<T: Component + Clone>(&self) -> VecDeque<Option<T>> {
+    pub fn get_all_components<T: Component + Clone>(&self) -> VecDeque<Option<T>> {
+        self.get_all_components_of_type(&TypeId::of::<T>())
+    }
+
+    #[allow(map_clone)]
+    pub fn get_all_components_of_type<T: Component + Clone>(&self, component_id: &TypeId)-> VecDeque<Option<T>>{
         self.component_stores
-            .get(&TypeId::of::<T>())
+            .get(component_id)
             .expect("")
             .values()
             .map(|x| x.downcast_ref().expect("get_all_components_on_entity: internal downcast error"))
@@ -108,7 +117,11 @@ impl EntityManager {
     }
 
     pub fn remove_all_component<T: Component>(&mut self) {
-        self.component_stores.remove(&TypeId::of::<T>());
+        self.remove_all_component_by_type(&TypeId::of::<T>());
+    }
+
+    pub fn remove_all_component_by_type(&mut self, component_id: &TypeId) {
+        self.component_stores.remove(component_id);
     }
 
     pub fn kill_entity(&mut self, uuid: &Uuid) {
@@ -155,11 +168,11 @@ impl EntityManager {
         self.entity_human_readable_names.insert(uuid, name);
     }
 
-    fn frozen(&mut self) {
+    pub fn frozen(&mut self) {
         self.frozen = true;
     }
 
-    fn un_frozen(&mut self) {
+    pub fn un_frozen(&mut self) {
         self.frozen = false;
     }
 }

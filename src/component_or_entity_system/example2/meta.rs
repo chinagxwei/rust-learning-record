@@ -62,11 +62,19 @@ impl MetaEntity {
 
 impl MetaEntity {
     fn has<T: Component>(&self) -> bool {
-        self.parent_entity_manager.has_component::<T>(&self.entity)
+        self.has_by_type(&TypeId::of::<T>())
+    }
+
+    fn has_by_type(&self, component_id: &TypeId) -> bool {
+        self.parent_entity_manager.has_component_by_type(&self.entity, component_id)
     }
 
     fn get<T: Component + Clone>(&self) -> Option<T> {
-        self.parent_entity_manager.get_component::<T>(&self.entity)
+        self.get_by_type(&TypeId::of::<T>())
+    }
+
+    fn get_by_type<T: Component + Clone>(&self, component_id: &TypeId) -> Option<T> {
+        self.parent_entity_manager.get_component_by_type(&self.entity, component_id)
     }
 
     fn get_all<T: Component + Clone>(&self) -> VecDeque<Option<T>> {
@@ -97,7 +105,7 @@ mod tests {
     use super::*;
     use std::any::Any;
 
-    #[derive(Debug, Clone)]
+    #[derive(Debug, Clone, PartialEq)]
     struct Position {
         x: f32,
         y: f32,
@@ -115,31 +123,32 @@ mod tests {
         }
     }
 
-    #[derive(Debug, Clone)]
-    struct Position2 {
+    #[derive(Debug, Clone, PartialEq)]
+    struct Navigation {
         local: Position,
         target: Position,
     }
 
-    impl std::fmt::Display for Position2 {
+    impl std::fmt::Display for Navigation {
         fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
             write!(f, "({},{})", self.local, self.target)
         }
     }
 
-    impl Position2 {
+    impl Navigation {
         pub fn new(local: Position, target: Position) -> Self {
-            Position2 { local, target }
+            Navigation { local, target }
         }
     }
 
     #[test]
     fn test() {
         let p = Position::new(0.1, 0.2);
-        let p2 = Position2::new(Position::new(0.3, 0.4), Position::new(0.5, 0.6));
+        let p2 = Navigation::new(Position::new(0.3, 0.4), Position::new(0.5, 0.6));
         let mut meta = MetaEntity::new_by_name(String::from("entity"));
-        meta.add(p);
-        meta.add(p2);
-        println!("{:#?}", meta);
+        meta.add(p.clone());
+        meta.add(p2.clone());
+        assert_eq!(Some(p), meta.get::<Position>());
+        assert_eq!(Some(p2), meta.get::<Navigation>());
     }
 }
