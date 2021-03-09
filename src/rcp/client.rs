@@ -21,10 +21,11 @@ impl Transport {
 
 impl Transport {
     fn send(&self, request: Request) -> String {
-        println!("{:?}", serde_json::to_string(&request).unwrap());
-        println!("发送数据");
+        println!("发送数据: {:?}", serde_json::to_string(&request).unwrap());
+
         let addr = format!("{}:{}", self.host, self.port).parse().unwrap();
-        self.runtime.block_on(async {
+
+        let output = self.runtime.block_on(async {
             let (mut buf, socket) = ([0; 1024], TcpSocket::new_v4().unwrap());
 
             let mut stream = socket.connect(addr).await.unwrap();
@@ -36,8 +37,10 @@ impl Transport {
             let res = decode::<Response>(&buf[0..len]);
 
             println!("{:?}", res.data);
+
+            res.data
         });
-        String::from("success")
+        output
     }
 }
 
