@@ -104,7 +104,6 @@ impl PokerBox {
 }
 
 use std::fmt::Write as FmtWrite;
-use rand::thread_rng;
 use rand::prelude::SliceRandom;
 
 impl Display for PokerBox {
