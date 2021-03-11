@@ -10,8 +10,22 @@ enum Suit {
 }
 
 impl Suit {
+    fn default_vec(has_joker: bool) -> Vec<Suit> {
+        let mut list = Vec::with_capacity(5);
+        list.push(Suit::Spade(0));
+        list.push(Suit::Heart(0));
+        list.push(Suit::Club(0));
+        list.push(Suit::Diamond(0));
+        if has_joker {
+            list.push(Suit::Joker(0));
+        }
+        list
+    }
+}
+
+impl Suit {
     fn as_str(&self) -> &'static str {
-        match *self {
+        match self {
             Suit::Spade(_) => "♠️",
             Suit::Heart(_) => "♥️",
             Suit::Club(_) => "♣️",
@@ -67,15 +81,9 @@ struct PokerBox {
 
 impl PokerBox {
     fn new(has_joker: bool) -> PokerBox {
-        let suits = vec![
-            Suit::Spade(0),
-            Suit::Heart(0),
-            Suit::Club(0),
-            Suit::Diamond(0),
-        ];
+        let suits = Suit::default_vec(false);
         let mut pokers = Vec::with_capacity(54);
         for i in suits {
-            // println!("{}", i);
             for j in 1..=13 {
                 match j {
                     x @ 1..=10 => {
@@ -131,6 +139,5 @@ mod tests {
         println!("{}\n", pokers);
         pokers.shuffle();
         println!("{}", pokers);
-
     }
 }
