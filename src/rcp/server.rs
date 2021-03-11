@@ -10,11 +10,11 @@ use std::borrow::{BorrowMut, Borrow};
 use crate::rcp::{HelloService, Request, Response};
 
 struct RpcServer {
-    handles: Arc<HashMap<&'static str, Box<dyn Fn(Request) -> String + Send + Sync + 'static>>>
+    handles: Arc<HashMap<&'static str, Box<dyn Fn(Request) -> Response + Send + Sync + 'static>>>
 }
 
 impl RpcServer {
-    fn add_service<T: Fn(Request) -> String + Send + Sync + 'static>(&mut self, type_name: &'static str, service: T) -> &mut RpcServer {
+    fn add_service<T: Fn(Request) -> Response + Send + Sync + 'static>(&mut self, type_name: &'static str, service: T) -> &mut RpcServer {
         Arc::get_mut(self.handles.borrow_mut())
             .unwrap()
             .insert(type_name, Box::new(service));
@@ -41,8 +41,8 @@ impl RpcServer {
                         }
                     };
                     let request: Request = serde_json::from_slice(&buf[0..n]).unwrap();
-                    let f = b.get(request.type_name.as_str()).map(|x| (*x)(request)).unwrap();
-                    let res = Response::new(f);
+
+                    let res = b.get(request.type_name.as_str()).map(|x| (*x)(request)).unwrap();
                     let send_data = serde_json::to_string(&res).unwrap();
                     socket.write_all(send_data.as_bytes()).await;
                     socket.flush();
@@ -62,21 +62,29 @@ impl HelloService for HelloServiceImpl {
         format!("say hello {}", content)
     }
 
-    fn send_hello(&self, content: String) -> String {
+    fn send_hello(&self, author: String, content: String) -> String {
         println!("request is coming: {}", content);
-        format!("send hello {}", content)
+        format!("send hello author: {}, content: {}", author, content)
     }
 }
 
+///
+/// 优化方向，添加服务闭包由过程宏完成
+///
 pub fn start(port: u32) -> Result<(), Box<dyn Error>> {
     let mut rpc_server = RpcServer { handles: Default::default() };
     let hello = HelloServiceImpl {};
     let arc_hello = Arc::new(hello);
-    let (a,b) = (Arc::clone(&arc_hello),Arc::clone(&arc_hello));
-    rpc_server.add_service("say_hello",  move|r| {
-        a.say_hello(r.data)
-    }).add_service("send_hello",  move|r| {
-        b.send_hello(r.data)
+    let (a, b) = (Arc::clone(&arc_hello), Arc::clone(&arc_hello));
+    rpc_server.add_service("say_hello", move |r| {
+        let data: (String, ) = serde_json::from_str(&r.data).unwrap();
+        let f = a.say_hello(data.0);
+        Response::new(f)
+    }).add_service("send_hello", move |r| {
+        println!("{:?}", r);
+        let data: (String, String) = serde_json::from_str(&r.data).unwrap();
+        let f = b.send_hello(data.0, data.1);
+        Response::new(f)
     })
         .start(port)
 }
@@ -87,6 +95,6 @@ mod tests {
 
     #[test]
     fn test() {
-        start(8080);
+        start(7878);
     }
 }

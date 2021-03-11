@@ -20,8 +20,12 @@ impl Transport {
 }
 
 impl Transport {
-    fn send(&self, request: Request) -> String {
-        println!("发送数据: {:?}", serde_json::to_string(&request).unwrap());
+    fn send<T: Serialize>(&self, data: (&'static str, Vec<T>)) -> String {
+        let (method_type, send_data) = data;
+
+        let request = Request::new(method_type.into(), serde_json::to_string(&send_data).unwrap());
+
+        println!("发送数据");
 
         let addr = format!("{}:{}", self.host, self.port).parse().unwrap();
 
@@ -54,20 +58,23 @@ impl HelloServiceProxy {
     }
 }
 
+///
+/// 优化方向，代理实现由过程宏完成
+///
 impl HelloService for HelloServiceProxy {
     fn say_hello(&self, content: String) -> String {
-        self.transport.send(Request::new("say_hello".into(), content))
+        self.transport.send(("say_hello", vec![content]))
     }
 
-    fn send_hello(&self, content: String) -> String {
-        self.transport.send(Request::new("send_hello".into(), content))
+    fn send_hello(&self, author: String, content: String) -> String {
+        self.transport.send(("send_hello", vec![author, content]))
     }
 }
 
 pub fn client_send() {
-    let service = HelloServiceProxy::new("127.0.0.1".parse().unwrap(), 8080);
+    let service = HelloServiceProxy::new("127.0.0.1".parse().unwrap(), 7878);
     service.say_hello("rpc simple demo".into());
-    service.send_hello("rpc simple demo".into());
+    service.send_hello("Tom".into(), "rpc simple demo".into());
 }
 
 #[cfg(test)]

@@ -45,6 +45,6 @@ impl<T: Any> Handler for T {}
 
 trait HelloService {
     fn say_hello(&self, content: String) -> String;
-    fn send_hello(&self, content: String) -> String;
+    fn send_hello(&self, author: String, content: String) -> String;
 }
 
