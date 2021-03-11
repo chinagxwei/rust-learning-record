@@ -7,7 +7,7 @@ use tokio::sync::{Mutex, mpsc};
 use std::sync::Arc;
 use std::error::Error;
 use std::borrow::{BorrowMut, Borrow};
-use crate::rcp::{HelloService, Request, Response};
+use crate::rpc::{HelloService, Request, Response};
 
 struct RpcServer {
     handles: Arc<HashMap<&'static str, Box<dyn Fn(Request) -> Response + Send + Sync + 'static>>>

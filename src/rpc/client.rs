@@ -1,4 +1,4 @@
-use crate::rcp::{HelloService, Request, Response, encode_and_send, decode};
+use crate::rpc::{HelloService, Request, Response, encode_and_send, decode};
 use std::net::{IpAddr, Ipv4Addr};
 use std::fmt::Debug;
 use serde::Serialize;
