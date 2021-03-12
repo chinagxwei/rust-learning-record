@@ -20,7 +20,7 @@ impl Transport {
 }
 
 impl Transport {
-    fn send<T: Serialize>(&self, data: (&'static str, Vec<T>)) -> String {
+    fn send<T: Serialize>(&self, data: (&'static str, Vec<T>)) -> Response {
         let (method_type, send_data) = data;
 
         let request = Request::new(method_type.into(), serde_json::to_string(&send_data).unwrap());
@@ -42,7 +42,7 @@ impl Transport {
 
             println!("{:?}", res.data);
 
-            res.data
+            res
         });
         output
     }
@@ -63,11 +63,13 @@ impl HelloServiceProxy {
 ///
 impl HelloService for HelloServiceProxy {
     fn say_hello(&self, content: String) -> String {
-        self.transport.send(("say_hello", vec![content]))
+        let res = self.transport.send(("say_hello", vec![content]));
+        serde_json::to_string::<String>(&res.data).unwrap()
     }
 
     fn send_hello(&self, author: String, content: String) -> String {
-        self.transport.send(("send_hello", vec![author, content]))
+        let res = self.transport.send(("send_hello", vec![author, content]));
+        serde_json::to_string::<String>(&res.data).unwrap()
     }
 }
 
