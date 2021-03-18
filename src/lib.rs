@@ -5,3 +5,4 @@ mod actor_model;
 mod common_trait;
 pub mod rpc;
 mod game_components;
+mod fn_type_erasure;

@@ -1,4 +1,4 @@
-use crate::rpc::{HelloService, Request, Response, encode_and_send, decode};
+use crate::rpc::{HelloService, Request, Response, encode_and_send, decode, Data};
 use std::net::{IpAddr, Ipv4Addr};
 use std::fmt::Debug;
 use serde::Serialize;
@@ -23,7 +23,9 @@ impl Transport {
     fn send<T: Serialize>(&self, data: (&'static str, Vec<T>)) -> Response {
         let (method_type, send_data) = data;
 
-        let request = Request::new(method_type.into(), serde_json::to_string(&send_data).unwrap());
+        let mut request = Request::new(method_type.into());
+
+        request.set_data(send_data);
 
         println!("发送数据");
 
@@ -63,13 +65,13 @@ impl HelloServiceProxy {
 ///
 impl HelloService for HelloServiceProxy {
     fn say_hello(&self, content: String) -> String {
-        let res = self.transport.send(("say_hello", vec![content]));
-        serde_json::to_string::<String>(&res.data).unwrap()
+        let mut res = self.transport.send(("say_hello", vec![content]));
+        serde_json::to_string::<String>(&res.data.take().unwrap()).unwrap()
     }
 
     fn send_hello(&self, author: String, content: String) -> String {
-        let res = self.transport.send(("send_hello", vec![author, content]));
-        serde_json::to_string::<String>(&res.data).unwrap()
+        let mut res = self.transport.send(("send_hello", vec![author, content]));
+        serde_json::to_string::<String>(&res.data.take().unwrap()).unwrap()
     }
 }
 
@@ -85,7 +87,7 @@ mod tests {
 
     #[test]
     fn test() {
-        client_send()
+        // client_send()
     }
 }
 
