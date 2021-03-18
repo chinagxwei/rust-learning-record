@@ -28,22 +28,25 @@ trait Data {
 #[derive(Serialize, Deserialize, Debug)]
 struct Request {
     type_name: String,
-    data: Option<String>,
+    data: String,
 }
 
-impl Data for Request{
+impl Data for Request {
     fn data(&self) -> &str {
-        &self.data.as_ref().unwrap()
+        &self.data
     }
 
     fn set_data<T>(&mut self, data: T) where T: Serialize {
-        self.data = Some(serde_json::to_string(&data).unwrap());
+        self.data = serde_json::to_string(&data).unwrap();
     }
 }
 
 impl Request {
-    fn new(type_name: String) -> Request {
-        Request { type_name, data:None }
+    fn new<T>(type_name: String, data: T) -> Request
+        where
+            T: Serialize
+    {
+        Request { type_name, data: serde_json::to_string(&data).unwrap() }
     }
 
     fn set_name(&mut self, name: String) {
@@ -53,22 +56,25 @@ impl Request {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct Response {
-    data: Option<String>
+    data: String
 }
 
-impl Data for Response{
+impl Data for Response {
     fn data(&self) -> &str {
-        &self.data.as_ref().unwrap()
+        &self.data
     }
 
     fn set_data<T>(&mut self, data: T) where T: Serialize {
-        self.data = Some(serde_json::to_string(&data).unwrap());
+        self.data = serde_json::to_string(&data).unwrap();
     }
 }
 
 impl Response {
-    fn new() -> Response {
-        Response { data:None }
+    fn new<T>(data: T) -> Response
+        where
+            T: Serialize
+    {
+        Response { data: serde_json::to_string(&data).unwrap() }
     }
 }
 

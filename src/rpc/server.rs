@@ -77,17 +77,20 @@ pub fn start(port: u32) -> Result<(), Box<dyn Error>> {
     let arc_hello = Arc::new(hello);
     let (a, b) = (Arc::clone(&arc_hello), Arc::clone(&arc_hello));
     rpc_server.add_service("say_hello", move |mut r| {
-        let data: (String, ) = serde_json::from_str(&r.data.take().unwrap()).unwrap();
+        println!("{:?}", r);
+        let data: (String, ) = serde_json::from_str(&r.data).unwrap();
         let f = a.say_hello(data.0);
-        let mut res = Response::new();
-        res.set_data(f);
+        println!("fn return : {}",f);
+        let res = Response::new(f);
+        println!("{:?}", res);
         res
     }).add_service("send_hello", move |mut r| {
         println!("{:?}", r);
-        let data: (String, String) = serde_json::from_str(&r.data.take().unwrap()).unwrap();
+        let data: (String, String) = serde_json::from_str(&r.data).unwrap();
         let f = b.send_hello(data.0, data.1);
-        let mut res = Response::new();
-        res.set_data(f);
+        println!("fn return : {}",f);
+        let res = Response::new(f);
+        println!("{:?}", res);
         res
     })
         .start(port)
