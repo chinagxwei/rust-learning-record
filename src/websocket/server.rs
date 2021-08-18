@@ -11,6 +11,15 @@ pub struct WebsocketServer {
     runtime: Option<Runtime>,
 }
 
+enum Opcode {
+    Extended = 0x0,
+    Text = 0x1,
+    Binary = 0x2,
+    Close = 0x8,
+    Ping = 0x9,
+    Pong = 0xA,
+}
+
 impl WebsocketServer {
     pub fn new(host: String, port: u16) -> WebsocketServer {
         WebsocketServer {
@@ -50,7 +59,7 @@ impl WebsocketServer {
                                 let byte_data = buf.get(0..n).unwrap();
                                 let str_data =
                                     String::from_utf8_lossy(byte_data).replace("\r\n", "\n");
-                                println!("{}",str_data);
+                                println!("{}", str_data);
                                 let get = Regex::new(r"^GET").unwrap();
                                 if get.is_match(str_data.as_str()) {
                                     let response = connect(str_data);
@@ -64,7 +73,7 @@ impl WebsocketServer {
                                 } else {
                                     println!("data length: {}", byte_data.len());
                                     let result = decoded(byte_data);
-                                    if let Some(msg) = result{
+                                    if let Some(msg) = result {
                                         println!("result content: {}", msg);
                                         if msg.len() > 0 {
                                             let mut msg_head = [0_u8; 2];
@@ -73,7 +82,7 @@ impl WebsocketServer {
                                             socket.write_all(&msg_head).await;
                                             socket.write_all(msg.as_bytes()).await;
                                         }
-                                    }else{
+                                    } else {
                                         break;
                                     }
                                 }
@@ -96,7 +105,10 @@ impl WebsocketServer {
 fn connect(data: String) -> String {
     let sec_key_text = Regex::new(r"Sec-WebSocket-Key: (.*)").unwrap();
     let group = sec_key_text.captures(data.as_str()).unwrap();
-    let sec_key = group.get(1).unwrap().as_str().to_string() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
+    let sec_key = group.get(1)
+        .unwrap()
+        .as_str()
+        .to_string() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     let mut sha1 = sha1::Sha1::new();
     sha1.update(sec_key);
     let result = sha1.finalize();
@@ -108,7 +120,7 @@ fn connect(data: String) -> String {
 }
 
 fn decoded(data: &[u8]) -> Option<String> {
-    println!("{:?}",data);
+    println!("{:?}", data);
     let payload = data[1] & 127;
     let (maks, decoded) = if payload <= 125 {
         (data.get(2..6), data.get(6..))
