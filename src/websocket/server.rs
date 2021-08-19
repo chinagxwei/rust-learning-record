@@ -11,6 +11,14 @@ pub struct WebsocketServer {
     runtime: Option<Runtime>,
 }
 
+struct FirstFrame {
+    fin: u8,
+    rsv_1: u8,
+    rsv_2: u8,
+    rsv_3: u8,
+    opcode: u8,
+}
+
 enum Opcode {
     Extended = 0x0,
     Text = 0x1,
@@ -57,6 +65,10 @@ impl WebsocketServer {
                             Ok(n) if n == 0 => return,
                             Ok(n) => {
                                 let byte_data = buf.get(0..n).unwrap();
+                                let frame = get_first_frame(byte_data[0]);
+                                if frame.opcode == 8 {
+                                    break;
+                                }
                                 let str_data =
                                     String::from_utf8_lossy(byte_data).replace("\r\n", "\n");
                                 println!("{}", str_data);
@@ -102,6 +114,24 @@ impl WebsocketServer {
     }
 }
 
+fn get_first_frame(frame: u8) -> FirstFrame {
+    FirstFrame {
+        fin: (frame >> 7) & 1,
+        rsv_1: (frame >> 6) & 1,
+        rsv_2: (frame >> 5) & 1,
+        rsv_3: (frame >> 4) & 1,
+        opcode: get_low_4(frame),
+    }
+}
+
+fn get_low_4(frame: u8) -> u8 {
+    frame & 0x0f
+}
+
+fn get_height_4(frame: u8) -> u8 {
+    frame >> 4
+}
+
 fn connect(data: String) -> String {
     let sec_key_text = Regex::new(r"Sec-WebSocket-Key: (.*)").unwrap();
     let group = sec_key_text.captures(data.as_str()).unwrap();
@@ -122,17 +152,43 @@ fn connect(data: String) -> String {
 fn decoded(data: &[u8]) -> Option<String> {
     println!("{:?}", data);
     let payload = data[1] & 127;
-    let (maks, decoded) = if payload <= 125 {
-        (data.get(2..6), data.get(6..))
-    } else {
-        (None, None)
-    };
-    if let (Some(maks_bytes), Some(decoded_bytes)) = (maks, decoded) {
-        let mut coded = Vec::with_capacity(decoded_bytes.len());
-        for (i, v) in decoded_bytes.iter().enumerate() {
-            coded.push(v ^ maks_bytes[i % 4])
+    let is_mask = (data[1] >> 7) & 1;
+    let (maks, decoded, len) = if payload <= 125 {
+        if is_mask == 1 {
+            (data.get(2..6 as usize), data.get(6 as usize..), payload as u64)
+        } else {
+            (None, data.get(2..), payload as u64)
         }
-        return String::from_utf8(coded).ok();
+    } else if payload == 126 {
+        let len_bytes = data.get(2..4).unwrap().to_vec();
+        let len = u16::from_le_bytes(len_bytes.try_into().unwrap());
+        if is_mask == 1 {
+            (data.get(4..8 as usize), data.get(8 as usize..), len as u64)
+        } else {
+            (None, data.get(4..), len as u64)
+        }
+    } else if payload == 127 {
+        let len_bytes = data.get(2..10).unwrap().to_vec();
+        let len = u64::from_le_bytes(len_bytes.try_into().unwrap());
+        if is_mask == 1 {
+            (data.get(10..14 as usize), data.get(14 as usize..), len as u64)
+        } else {
+            (None, data.get(10..), len as u64)
+        }
+    } else {
+        (None, None, 0)
+    };
+
+    if is_mask == 1 {
+        if let (Some(maks_bytes), Some(decoded_bytes)) = (maks, decoded) {
+            let mut coded = Vec::with_capacity(decoded_bytes.len());
+            for (i, v) in decoded_bytes.iter().enumerate() {
+                coded.push(v ^ maks_bytes[i % 4])
+            }
+            return String::from_utf8(coded).ok();
+        }
+    }else{
+        return String::from_utf8(decoded.unwrap().to_vec()).ok();
     }
     None
 }
