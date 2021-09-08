@@ -28,6 +28,23 @@ enum Opcode {
     Pong = 0xA,
 }
 
+#[derive(Clone)]
+pub enum WebsocketSubProtocols {
+    MQTT,
+    SOAP,
+    WAMP,
+}
+
+impl WebsocketSubProtocols {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            WebsocketSubProtocols::MQTT => { "mqtt" }
+            WebsocketSubProtocols::SOAP => { "soap" }
+            WebsocketSubProtocols::WAMP => { "wamp" }
+        }
+    }
+}
+
 impl WebsocketServer {
     pub fn new(host: String, port: u16) -> WebsocketServer {
         WebsocketServer {
@@ -50,7 +67,7 @@ impl WebsocketServer {
             return;
         }
 
-        self.runtime.as_ref().unwrap().block_on(async {
+        self.runtime.as_ref().expect("runtime data is None").block_on(async {
             let listener = TcpListener::bind(format!("{}:{}", self.host, self.port))
                 .await
                 .unwrap();
@@ -64,7 +81,7 @@ impl WebsocketServer {
                             // socket closed
                             Ok(n) if n == 0 => return,
                             Ok(n) => {
-                                let byte_data = buf.get(0..n).unwrap();
+                                let byte_data = buf.get(0..n).expect("get data bytes error");
                                 let frame = get_first_frame(byte_data[0]);
                                 if frame.opcode == 8 {
                                     break;
@@ -72,7 +89,7 @@ impl WebsocketServer {
                                 let str_data =
                                     String::from_utf8_lossy(byte_data).replace("\r\n", "\n");
                                 println!("{}", str_data);
-                                let get = Regex::new(r"^GET").unwrap();
+                                let get = Regex::new(r"^GET").expect("regex match error");
                                 if get.is_match(str_data.as_str()) {
                                     let response = connect(str_data);
                                     println!("{:?}", response);
@@ -133,20 +150,22 @@ fn get_height_4(frame: u8) -> u8 {
 }
 
 fn connect(data: String) -> String {
-    let sec_key_text = Regex::new(r"Sec-WebSocket-Key: (.*)").unwrap();
-    let group = sec_key_text.captures(data.as_str()).unwrap();
+    let sec_key_text = Regex::new(r"Sec-WebSocket-Key: (.*)").expect("get sec_key_text error");
+    let group = sec_key_text.captures(data.as_str()).expect("captures data error");
     let sec_key = group.get(1)
-        .unwrap()
+        .expect("group match error")
         .as_str()
         .to_string() + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
     let mut sha1 = sha1::Sha1::new();
     sha1.update(sec_key);
-    let result = sha1.finalize();
-    let sec_accept = base64::encode(result);
-    return format!(
-        "HTTP/1.1 101 Switching Protocols\r\nConnection: Upgrade\r\nUpgrade: websocket\r\nSec-WebSocket-Accept: {}\r\n\r\n",
-        sec_accept
-    );
+    let sec_accept = base64::encode(sha1.finalize());
+    let mut res: Vec<String> = vec![
+        "HTTP/1.1 101 Switching Protocols".into(),
+        "Connection: Upgrade".into(),
+        "Upgrade: websocket".into(),
+        format!("Sec-WebSocket-Accept: {}\r\n\r\n", sec_accept),
+    ];
+    return res.join("\r\n");
 }
 
 fn decoded(data: &[u8]) -> Option<String> {
@@ -160,16 +179,16 @@ fn decoded(data: &[u8]) -> Option<String> {
             (None, data.get(2..), payload as u64)
         }
     } else if payload == 126 {
-        let len_bytes = data.get(2..4).unwrap().to_vec();
-        let len = u16::from_le_bytes(len_bytes.try_into().unwrap());
+        let len_bytes = data.get(2..4).expect("126 data len error").to_vec();
+        let len = u16::from_le_bytes(len_bytes.try_into().expect("error parsing bytes to u16"));
         if is_mask == 1 {
             (data.get(4..8 as usize), data.get(8 as usize..), len as u64)
         } else {
             (None, data.get(4..), len as u64)
         }
     } else if payload == 127 {
-        let len_bytes = data.get(2..10).unwrap().to_vec();
-        let len = u64::from_le_bytes(len_bytes.try_into().unwrap());
+        let len_bytes = data.get(2..10).expect("127 data len error").to_vec();
+        let len = u64::from_le_bytes(len_bytes.try_into().expect("error parsing bytes to u64"));
         if is_mask == 1 {
             (data.get(10..14 as usize), data.get(14 as usize..), len as u64)
         } else {
@@ -187,8 +206,8 @@ fn decoded(data: &[u8]) -> Option<String> {
             }
             return String::from_utf8(coded).ok();
         }
-    }else{
-        return String::from_utf8(decoded.unwrap().to_vec()).ok();
+    } else {
+        return String::from_utf8(decoded.expect("decoded data is None").to_vec()).ok();
     }
     None
 }
