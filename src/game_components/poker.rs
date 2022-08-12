@@ -2,22 +2,22 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Copy)]
 enum Suit {
-    Spade(u32),
-    Heart(u32),
-    Club(u32),
-    Diamond(u32),
-    Joker(u32),
+    Spade(u8),
+    Heart(u8),
+    Club(u8),
+    Diamond(u8),
+    Joker(u8),
 }
 
 impl Suit {
     fn default_vec(has_joker: bool) -> Vec<Suit> {
         let mut list = Vec::with_capacity(5);
-        list.push(Suit::Spade(0));
-        list.push(Suit::Heart(0));
-        list.push(Suit::Club(0));
-        list.push(Suit::Diamond(0));
+        list.push(Suit::Spade(4));
+        list.push(Suit::Heart(3));
+        list.push(Suit::Club(2));
+        list.push(Suit::Diamond(1));
         if has_joker {
-            list.push(Suit::Joker(0));
+            list.push(Suit::Joker(5));
         }
         list
     }
@@ -34,7 +34,7 @@ impl Suit {
         }
     }
 
-    fn as_value(&self) -> u32 {
+    fn as_value(&self) -> u8 {
         match *self {
             Suit::Spade(val) => val,
             Suit::Heart(val) => val,
