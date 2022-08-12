@@ -16,15 +16,41 @@ async fn encode_and_send<T: Serialize>(stream: &mut TcpStream, data: T) {
     stream.flush();
 }
 
+trait Data {
+    fn data(&self) -> &str;
+    fn set_data<T>(&mut self, data: T) where T: Serialize;
+    fn get_data<'a, T: Deserialize<'a>>(&'a self) -> T {
+        let bytes = self.data().as_bytes();
+        serde_json::from_slice(bytes).unwrap()
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 struct Request {
     type_name: String,
     data: String,
 }
 
+impl Data for Request {
+    fn data(&self) -> &str {
+        &self.data
+    }
+
+    fn set_data<T>(&mut self, data: T) where T: Serialize {
+        self.data = serde_json::to_string(&data).unwrap();
+    }
+}
+
 impl Request {
-    fn new(type_name: String, data: String) -> Request {
-        Request { type_name, data }
+    fn new<T>(type_name: String, data: T) -> Request
+        where
+            T: Serialize
+    {
+        Request { type_name, data: serde_json::to_string(&data).unwrap() }
+    }
+
+    fn set_name(&mut self, name: String) {
+        self.type_name = name;
     }
 }
 
@@ -33,9 +59,22 @@ struct Response {
     data: String
 }
 
+impl Data for Response {
+    fn data(&self) -> &str {
+        &self.data
+    }
+
+    fn set_data<T>(&mut self, data: T) where T: Serialize {
+        self.data = serde_json::to_string(&data).unwrap();
+    }
+}
+
 impl Response {
-    fn new(data: String) -> Response {
-        Response { data }
+    fn new<T>(data: T) -> Response
+        where
+            T: Serialize
+    {
+        Response { data: serde_json::to_string(&data).unwrap() }
     }
 }
 

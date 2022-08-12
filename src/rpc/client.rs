@@ -1,4 +1,4 @@
-use crate::rpc::{HelloService, Request, Response, encode_and_send, decode};
+use crate::rpc::{HelloService, Request, Response, encode_and_send, decode, Data};
 use std::net::{IpAddr, Ipv4Addr};
 use std::fmt::Debug;
 use serde::Serialize;
@@ -23,7 +23,7 @@ impl Transport {
     fn send<T: Serialize>(&self, data: (&'static str, Vec<T>)) -> Response {
         let (method_type, send_data) = data;
 
-        let request = Request::new(method_type.into(), serde_json::to_string(&send_data).unwrap());
+        let mut request = Request::new(method_type.into(), send_data);
 
         println!("发送数据");
 
@@ -37,6 +37,8 @@ impl Transport {
             encode_and_send(&mut stream, request).await;
 
             let len = stream.read(&mut buf).await.unwrap();
+
+            println!("接收数据");
 
             let res = decode::<Response>(&buf[0..len]);
 
@@ -63,20 +65,22 @@ impl HelloServiceProxy {
 ///
 impl HelloService for HelloServiceProxy {
     fn say_hello(&self, content: String) -> String {
-        let res = self.transport.send(("say_hello", vec![content]));
-        serde_json::to_string::<String>(&res.data).unwrap()
+        let mut res = self.transport.send(("say_hello", vec![content]));
+        serde_json::from_str::<String>(&res.data).unwrap()
     }
 
     fn send_hello(&self, author: String, content: String) -> String {
-        let res = self.transport.send(("send_hello", vec![author, content]));
-        serde_json::to_string::<String>(&res.data).unwrap()
+        let mut res = self.transport.send(("send_hello", vec![author, content]));
+        serde_json::from_str::<String>(&res.data).unwrap()
     }
 }
 
 pub fn client_send() {
     let service = HelloServiceProxy::new("127.0.0.1".parse().unwrap(), 7878);
-    service.say_hello("rpc simple demo".into());
-    service.send_hello("Tom".into(), "rpc simple demo".into());
+    let res_msg = service.say_hello("rpc simple demo".into());
+    println!("{}", res_msg);
+    let res_msg_2 = service.send_hello("Tom".into(), "rpc simple demo".into());
+    println!("{}", res_msg_2);
 }
 
 #[cfg(test)]

@@ -7,7 +7,7 @@ use tokio::sync::{Mutex, mpsc};
 use std::sync::Arc;
 use std::error::Error;
 use std::borrow::{BorrowMut, Borrow};
-use crate::rpc::{HelloService, Request, Response};
+use crate::rpc::{HelloService, Request, Response, Data};
 
 struct RpcServer {
     handles: Arc<HashMap<&'static str, Box<dyn Fn(Request) -> Response + Send + Sync + 'static>>>
@@ -76,15 +76,22 @@ pub fn start(port: u32) -> Result<(), Box<dyn Error>> {
     let hello = HelloServiceImpl {};
     let arc_hello = Arc::new(hello);
     let (a, b) = (Arc::clone(&arc_hello), Arc::clone(&arc_hello));
-    rpc_server.add_service("say_hello", move |r| {
+    rpc_server.add_service("say_hello", move |mut r| {
+        println!("{:?}", r);
         let data: (String, ) = serde_json::from_str(&r.data).unwrap();
         let f = a.say_hello(data.0);
-        Response::new(f)
-    }).add_service("send_hello", move |r| {
+        println!("fn return : {}",f);
+        let res = Response::new(f);
+        println!("{:?}", res);
+        res
+    }).add_service("send_hello", move |mut r| {
         println!("{:?}", r);
         let data: (String, String) = serde_json::from_str(&r.data).unwrap();
         let f = b.send_hello(data.0, data.1);
-        Response::new(f)
+        println!("fn return : {}",f);
+        let res = Response::new(f);
+        println!("{:?}", res);
+        res
     })
         .start(port)
 }

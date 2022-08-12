@@ -21,65 +21,50 @@ enum StateType {
 impl StateType {
     fn init(&self) -> StateType {
         match self {
-            StateType::INIT => *self,
-            StateType::START => *self,
-            StateType::PAUSE => *self,
+            StateType::INIT |
+            StateType::START |
+            StateType::PAUSE |
             StateType::FAIL => *self,
-            StateType::COMPLETE => {
-                StateType::INIT
-            }
+            StateType::COMPLETE => StateType::INIT
         }
     }
 
     fn start(&self) -> StateType {
         match *self {
-            StateType::INIT => {
-                StateType::START
-            }
-            StateType::START => *self,
-            StateType::PAUSE => {
-                StateType::START
-            }
-            StateType::FAIL => *self,
-            StateType::COMPLETE => {
-                StateType::START
-            }
+            StateType::START | StateType::FAIL => *self,
+            StateType::INIT |
+            StateType::PAUSE |
+            StateType::COMPLETE => StateType::START
         }
     }
 
     fn pause(&self) -> StateType {
         match self {
-            StateType::INIT => *self,
-            StateType::START => {
-                StateType::PAUSE
-            }
-            StateType::PAUSE => *self,
-            StateType::FAIL => *self,
+            StateType::INIT |
+            StateType::PAUSE |
+            StateType::FAIL |
             StateType::COMPLETE => *self,
+            StateType::START => StateType::PAUSE
         }
     }
 
     fn fail(&self) -> StateType {
         match *self {
-            StateType::INIT => *self,
-            StateType::START => {
-                StateType::FAIL
-            }
-            StateType::PAUSE => *self,
-            StateType::FAIL => *self,
+            StateType::INIT |
+            StateType::PAUSE |
+            StateType::FAIL |
             StateType::COMPLETE => *self,
+            StateType::START => StateType::FAIL
         }
     }
 
     fn complete(&self) -> StateType {
         match *self {
-            StateType::INIT => *self,
-            StateType::START => {
-                StateType::COMPLETE
-            }
-            StateType::PAUSE => *self,
-            StateType::FAIL => *self,
+            StateType::INIT |
+            StateType::PAUSE |
+            StateType::FAIL |
             StateType::COMPLETE => *self,
+            StateType::START => StateType::COMPLETE
         }
     }
 }
@@ -104,7 +89,7 @@ impl Display for StateType {
 
 #[derive(Debug)]
 struct ReadState {
-    state: StateType
+    state: StateType,
 }
 
 impl ReadState {
@@ -151,6 +136,10 @@ mod tests {
         rs.pause();
         rs.complete();
         rs.start();
+        rs.complete();
+        rs.start();
+        rs.fail();
+        rs.pause();
         rs.complete();
         println!("{:?}", rs);
     }
